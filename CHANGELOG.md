@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/NaMiraNet/namira-web/compare/v1.1.0...v1.1.1) (2025-07-03)
+
+
+### Bug Fixes
+
+* add default limit value for sub link ([eb22832](https://github.com/NaMiraNet/namira-web/commit/eb22832a611bec0e17737be7226116234c72d47a))
+
 ## [1.1.0](https://github.com/NaMiraNet/namira-web/compare/v1.0.0...v1.1.0) (2025-07-03)
 
 
