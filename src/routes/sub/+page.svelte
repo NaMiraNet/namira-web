@@ -3,17 +3,225 @@
 	import Navbar from '../../components/navbar.svelte';
 
 	import { page } from '$app/state';
-	const subLink = `${page.url.origin}/api/subscription`;
+	import type { TestResult } from '$lib/types';
+	import MultiSelect from '../../components/multiSelect.svelte';
+
 	type AccordionState = {
 		android: boolean;
 		ios: boolean;
 		pc: boolean;
 		links: boolean;
 		copied: boolean;
+		protocols: string[];
+		countries: string[];
 	};
 
 	type SubState = {
 		accordion: AccordionState;
+	};
+
+	const VALID_PROTOCOLS: TestResult['protocol'][] = ['vmess', 'vless', 'trojan', 'ss'];
+
+	const VALID_COUNTRY_CODES: { [countryName: string]: string } = {
+		افغانستان: 'af',
+		آلبانی: 'al',
+		الجزایر: 'dz',
+		'ساموآی آمریکا': 'as',
+		آندورا: 'ad',
+		آنگولا: 'ao',
+		آنگویلا: 'ai',
+		جنوبگان: 'aq',
+		'آنتیگوا و باربودا': 'ag',
+		آرژانتین: 'ar',
+		ارمنستان: 'am',
+		آروبا: 'aw',
+		استرالیا: 'au',
+		اتریش: 'at',
+		'جمهوری آذربایجان': 'az',
+		باهاما: 'bs',
+		بحرین: 'bh',
+		بنگلادش: 'bd',
+		باربادوس: 'bb',
+		بلاروس: 'by',
+		بلژیک: 'be',
+		بلیز: 'bz',
+		بنین: 'bj',
+		برمودا: 'bm',
+		بوتان: 'bt',
+		بولیوی: 'bo',
+		'بوسنی و هرزگوین': 'ba',
+		بوتسوانا: 'bw',
+		برزیل: 'br',
+		برونئی: 'bn',
+		بلغارستان: 'bg',
+		بورکینافاسو: 'bf',
+		بوروندی: 'bi',
+		کامبوج: 'kh',
+		کامرون: 'cm',
+		کانادا: 'ca',
+		'کیپ ورد': 'cv',
+		'جمهوری آفریقای مرکزی': 'cf',
+		چاد: 'td',
+		شیلی: 'cl',
+		چین: 'cn',
+		کلمبیا: 'co',
+		کومور: 'km',
+		کنگو: 'cg',
+		'جمهوری دموکراتیک کنگو': 'cd',
+		کاستاریکا: 'cr',
+		'ساحل عاج': 'ci',
+		کرواسی: 'hr',
+		کوبا: 'cu',
+		قبرس: 'cy',
+		'جمهوری چک': 'cz',
+		دانمارک: 'dk',
+		جیبوتی: 'dj',
+		دومینیکا: 'dm',
+		'جمهوری دومینیکن': 'do',
+		اکوادور: 'ec',
+		مصر: 'eg',
+		السالوادور: 'sv',
+		'گینه استوایی': 'gq',
+		اریتره: 'er',
+		استونی: 'ee',
+		اسواتینی: 'sz',
+		اتیوپی: 'et',
+		فیجی: 'fj',
+		فنلاند: 'fi',
+		فرانسه: 'fr',
+		گابن: 'ga',
+		گامبیا: 'gm',
+		گرجستان: 'ge',
+		آلمان: 'de',
+		غنا: 'gh',
+		یونان: 'gr',
+		گرنادا: 'gd',
+		گواتمالا: 'gt',
+		گینه: 'gn',
+		'گینه بیسائو': 'gw',
+		گویان: 'gy',
+		هائیتی: 'ht',
+		هندوراس: 'hn',
+		مجارستان: 'hu',
+		ایسلند: 'is',
+		هند: 'in',
+		اندونزی: 'id',
+		ایران: 'ir',
+		عراق: 'iq',
+		ایرلند: 'ie',
+		اسرائیل: 'il',
+		ایتالیا: 'it',
+		جامائیکا: 'jm',
+		ژاپن: 'jp',
+		اردن: 'jo',
+		قزاقستان: 'kz',
+		کنیا: 'ke',
+		کیریباتی: 'ki',
+		'کره شمالی': 'kp',
+		'کره جنوبی': 'kr',
+		کویت: 'kw',
+		قرقیزستان: 'kg',
+		لائوس: 'la',
+		لتونی: 'lv',
+		لبنان: 'lb',
+		لسوتو: 'ls',
+		لیبریا: 'lr',
+		لیبی: 'ly',
+		لیختن‌اشتاین: 'li',
+		لیتوانی: 'lt',
+		لوکزامبورگ: 'lu',
+		'مقدونیه شمالی': 'mk',
+		ماداگاسکار: 'mg',
+		مالاوی: 'mw',
+		مالزی: 'my',
+		مالدیو: 'mv',
+		مالی: 'ml',
+		مالت: 'mt',
+		'جزایر مارشال': 'mh',
+		موریتانی: 'mr',
+		موریس: 'mu',
+		مکزیک: 'mx',
+		میکرونزی: 'fm',
+		مولداوی: 'md',
+		موناکو: 'mc',
+		مغولستان: 'mn',
+		مونته‌نگرو: 'me',
+		مراکش: 'ma',
+		موزامبیک: 'mz',
+		میانمار: 'mm',
+		نامیبیا: 'na',
+		نائورو: 'nr',
+		نپال: 'np',
+		هلند: 'nl',
+		نیوزیلند: 'nz',
+		نیکاراگوئه: 'ni',
+		نیجر: 'ne',
+		نیجریه: 'ng',
+		نروژ: 'no',
+		عمان: 'om',
+		پاکستان: 'pk',
+		پالائو: 'pw',
+		پاناما: 'pa',
+		'پاپوآ گینه نو': 'pg',
+		پاراگوئه: 'py',
+		پرو: 'pe',
+		فیلیپین: 'ph',
+		لهستان: 'pl',
+		پرتغال: 'pt',
+		قطر: 'qa',
+		رومانی: 'ro',
+		روسیه: 'ru',
+		رواندا: 'rw',
+		'سنت کیتس و نویس': 'kn',
+		'سنت لوسیا': 'lc',
+		'سنت وینسنت و گرنادین‌ها': 'vc',
+		ساموآ: 'ws',
+		'سان مارینو': 'sm',
+		'سائوتومه و پرینسیپ': 'st',
+		'عربستان سعودی': 'sa',
+		سنگال: 'sn',
+		صربستان: 'rs',
+		سیشل: 'sc',
+		سیرالئون: 'sl',
+		سنگاپور: 'sg',
+		اسلواکی: 'sk',
+		اسلوونی: 'si',
+		'جزایر سلیمان': 'sb',
+		سومالی: 'so',
+		'آفریقای جنوبی': 'za',
+		'سودان جنوبی': 'ss',
+		اسپانیا: 'es',
+		سری‌لانکا: 'lk',
+		سودان: 'sd',
+		سورینام: 'sr',
+		سوئد: 'se',
+		سوئیس: 'ch',
+		سوریه: 'sy',
+		تایوان: 'tw',
+		تاجیکستان: 'tj',
+		تانزانیا: 'tz',
+		تایلند: 'th',
+		'تیمور شرقی': 'tl',
+		توگو: 'tg',
+		تونگا: 'to',
+		'ترینیداد و توباگو': 'tt',
+		تونس: 'tn',
+		ترکیه: 'tr',
+		ترکمنستان: 'tm',
+		تووالو: 'tv',
+		اوگاندا: 'ug',
+		اوکراین: 'ua',
+		'امارات متحده عربی': 'ae',
+		بریتانیا: 'gb',
+		'ایالات متحده آمریکا': 'us',
+		اروگوئه: 'uy',
+		ازبکستان: 'uz',
+		وانواتو: 'vu',
+		ونزوئلا: 've',
+		ویتنام: 'vn',
+		یمن: 'ye',
+		زامبیا: 'zm',
+		زیمبابوه: 'zw'
 	};
 
 	const state = $state<SubState>({
@@ -22,12 +230,29 @@
 			ios: false,
 			pc: false,
 			links: false,
-			copied: false
+			copied: false,
+			protocols: [],
+			countries: []
 		}
 	});
 	function btoaUtf8(str: string): string {
 		return btoa(unescape(encodeURIComponent(str)));
 	}
+	const subLink = $derived.by(() => {
+		const baseUrl = `${page.url.origin}/api/subscription?sort=1`;
+		const params = new URLSearchParams();
+
+		if (state.accordion.protocols.length > 0) {
+			params.set('protocol', state.accordion.protocols.join(','));
+		}
+
+		if (state.accordion.countries.length > 0) {
+			const countryCodes = state.accordion.countries.map((pr) => VALID_COUNTRY_CODES[pr]);
+			params.set('country', countryCodes.join(','));
+		}
+
+		return `${baseUrl}${params.toString()}`;
+	});
 </script>
 
 <Navbar></Navbar>
@@ -44,6 +269,21 @@
 		</div>
 		<br />
 		<div class="mb-24 flex flex-col gap-4 rounded-lg bg-white p-4 text-justify leading-7">
+			<p class="text-center text-lg font-bold">تنظیمات خود را انتخاب کنید</p>
+
+			<MultiSelect
+				options={Object.keys(VALID_COUNTRY_CODES)}
+				bind:selected={state.accordion.countries}
+				placeholder="کشورها را انتخاب کنید"
+				class="z-20 rounded-lg bg-gradient-to-br from-sky-400 to-blue-500"
+			/>
+			<MultiSelect
+				options={VALID_PROTOCOLS}
+				bind:selected={state.accordion.protocols}
+				placeholder="پروتکل‌ها را انتخاب کنید"
+				class="rounded-lg bg-gradient-to-br from-sky-400 to-blue-500"
+			/>
+
 			<h1 class="text-center text-lg font-bold">پلتفرم خود را انتخاب کنید</h1>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
